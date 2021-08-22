@@ -23,6 +23,10 @@ const sourceToDestination = new Schema(
 	},
 	{ timestamps: true }
 );
+sourceToDestination.index(
+	{ source: 1, destination: 1 },
+	{ name: "sourceToDestination", unique: true }
+);
 
 module.exports = {
 	sourceToDestination: mongoose.model(

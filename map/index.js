@@ -1,29 +1,47 @@
 const { Client } = require("@googlemaps/google-maps-services-js");
-const { checkCache: cache, insert: addToCache } = require("../cache");
-const { sourceToDestination } = require("../db/schema");
+const { existInDB, AddToDB } = require("../db/querys");
+
 require("dotenv").config();
 
 const client = new Client({});
 
+/**
+ *  check in cashe if found increase local hit value
+ *  check DB if found insert to cache
+ * 	*	if insert add hit value
+ * 	*	if not update db hit value
+ * 	*	if removed need to update hit value of removed
+ * 	make api call to get distance
+ *  * 	add to DB insert to chache
+ */
+
 async function getDistance(source, destination) {
 	try {
-		let result = cache(source, destination) | null;
-		if (!result) {
-			({ lat: lat1, lng: lon1 } = (
-				await getLocation(source)
-			).geometry.location);
-			({ lat: lat2, lng: lon2 } = (
-				await getLocation(destination)
-			).geometry.location);
-			result = Math.round(distance(lat1, lat2, lon1, lon2));
-			addToCache(source, destination);
+		let distance = await existInDB(source, destination);
+		if (!distance) {
+			distance = await getDistanceAPI(source, destination);
+			AddToDB(source, destination, distance);
 		}
-		console.log(result);
-		return result;
+		return distance;
 	} catch (e) {
-		console.log(e);
-		return null;
+		throw e;
 	}
+}
+
+async function getDistanceAPI(source, destination) {
+	let lat1, lat2, lon1, lon2, distance;
+	try {
+		({ lat: lat1, lng: lon1 } = (
+			await getLocation(source)
+		).geometry.location);
+		({ lat: lat2, lng: lon2 } = (
+			await getLocation(destination)
+		).geometry.location);
+		distance = Math.round(calculatDistance(lat1, lat2, lon1, lon2));
+	} catch (e) {
+		throw new Error(e.message);
+	}
+	return distance;
 }
 
 async function getLocation(address) {
@@ -35,16 +53,17 @@ async function getLocation(address) {
 			},
 			timeout: 1000, // milliseconds
 		});
-		if (response.data.status !== "OK") return null;
+		if (response.data.status !== "OK") {
+			response.data.error_message = "failed to find location: " + address;
+			throw { response };
+		}
 		return response.data.results[0];
 	} catch (e) {
-		throw new Error(
-			"Failed to get location: " + e.response.data.error_message
-		);
+		throw new Error(e.response.data.error_message);
 	}
 }
 
-function distance(lat1, lat2, lon1, lon2) {
+function calculatDistance(lat1, lat2, lon1, lon2) {
 	// The math module contains a function
 	// named toRadians which converts from
 	// degrees to radians.
@@ -72,4 +91,5 @@ function distance(lat1, lat2, lon1, lon2) {
 
 module.exports = {
 	getDistance,
+	getDistanceAPI,
 };
