@@ -1,21 +1,28 @@
+//load .env
 require("dotenv").config();
 
+//extrnal imports
 const express = require("express");
 const app = express();
 
+//import my files
 const map = require("./map");
 const { GetPopulerSearch, setSourceToDestination } = require("./db/querys");
 const { DBconnected } = require("./middlewares/db");
 const { findDistance } = require("./middlewares/map");
 
-const port = 8080;
+//server port
+const port = process.env.SERVER_PORT | 8080;
 
+//json parse
 app.use(express.json());
 
+//hello end point return status 200
 app.get("/hello", (req, res, next) => {
-	res.status(200).end();
+	return res.status(200).end();
 });
 
+//distance end point return distance between 2 location on the map
 app.get(
 	"/distance",
 	DBconnected,
@@ -29,6 +36,7 @@ app.get(
 	findDistance
 );
 
+//health end point return DB connection status 200 if all good 500 if somthing worng
 app.get("/health", DBconnected, (req, res, next) => {
 	if (!req.db)
 		return res
@@ -37,6 +45,7 @@ app.get("/health", DBconnected, (req, res, next) => {
 	return res.sendStatus(200);
 });
 
+//popularsearch end point return most populer serach for location on DB
 app.get("/popularsearch", DBconnected, async (req, res, next) => {
 	if (req.db) {
 		let popularsearch = await GetPopulerSearch();
@@ -48,6 +57,7 @@ app.get("/popularsearch", DBconnected, async (req, res, next) => {
 	});
 });
 
+//POST distance end point allow to insert Source To Destination and its distance to the DB
 app.post("/distance", DBconnected, async (req, res, next) => {
 	if (req.db) {
 		try {

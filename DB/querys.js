@@ -38,7 +38,13 @@ async function AddToDB(source, destination, distance) {
 	}
 }
 
+/**
+ * return the doc with the most hits on the database
+ * @returns {{String,String,number}}
+ */
 async function GetPopulerSearch() {
+	test = schema.sourceToDestination.find();
+	console.log(test);
 	let result = (
 		await schema.sourceToDestination
 			.find()
@@ -49,6 +55,11 @@ async function GetPopulerSearch() {
 	return result;
 }
 
+/**
+ *
+ * @param {{source:String, destination:String, distance:number}} param0
+ * @returns
+ */
 async function setSourceToDestination({ source, destination, distance }) {
 	try {
 		// validate input with shema
@@ -58,7 +69,7 @@ async function setSourceToDestination({ source, destination, distance }) {
 			distance,
 		});
 		//search for doc if found update not not create new then return the doc
-		let doc = await schema.sourceToDestination.findOneAndUpdate(
+		let doc = schema.sourceToDestination.findOneAndUpdate(
 			{
 				source,
 				destination,
@@ -71,10 +82,18 @@ async function setSourceToDestination({ source, destination, distance }) {
 				projection: "destination hits source -_id",
 			}
 		);
+		console.log(doc);
+		doc = await doc.exec();
 		return doc;
 	} catch (e) {
 		throw e;
 	}
+}
+
+function bulkSave(docs) {
+	try {
+		let result = schema.bulkSave(docs);
+	} catch (error) {}
 }
 
 module.exports = {

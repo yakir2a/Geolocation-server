@@ -1,20 +1,16 @@
 const { Client } = require("@googlemaps/google-maps-services-js");
 const { existInDB, AddToDB } = require("../db/querys");
 
-require("dotenv").config();
-
 const client = new Client({});
 
 /**
- *  check in cashe if found increase local hit value
- *  check DB if found insert to cache
- * 	*	if insert add hit value
- * 	*	if not update db hit value
- * 	*	if removed need to update hit value of removed
- * 	make api call to get distance
- *  * 	add to DB insert to chache
+ * get distance of 2 point
+ * first check DB if not found look in extrnal API
+ *
+ * @param {String} source
+ * @param {String} destination
+ * @returns {number} or throw error if failed
  */
-
 async function getDistance(source, destination) {
 	try {
 		let distance = await existInDB(source, destination);
@@ -28,6 +24,14 @@ async function getDistance(source, destination) {
 	}
 }
 
+/**
+ * get distance of 2 point
+ * look in extrnal API
+ *
+ * @param {String} source
+ * @param {String} destination
+ * @returns {number} or throw error if failed
+ */
 async function getDistanceAPI(source, destination) {
 	let lat1, lat2, lon1, lon2, distance;
 	try {
@@ -44,6 +48,12 @@ async function getDistanceAPI(source, destination) {
 	return distance;
 }
 
+/**
+ * searching for giving address GEOCODE with google map API
+ *
+ * @param {String} address
+ * @returns {Object} or throw error if failed
+ */
 async function getLocation(address) {
 	try {
 		const response = await client.geocode({
@@ -63,6 +73,16 @@ async function getLocation(address) {
 	}
 }
 
+/**
+ * giving 2 peirs or longitude and latitude
+ * and calcuating thier distance im KM
+ *
+ * @param {number} lat1
+ * @param {number} lat2
+ * @param {number} lon1
+ * @param {number} lon2
+ * @returns {number}
+ */
 function calculatDistance(lat1, lat2, lon1, lon2) {
 	// The math module contains a function
 	// named toRadians which converts from

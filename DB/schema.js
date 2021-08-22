@@ -23,6 +23,8 @@ const sourceToDestination = new Schema(
 	},
 	{ timestamps: true }
 );
+
+//index uniqe combo of source destination
 sourceToDestination.index(
 	{ source: 1, destination: 1 },
 	{ name: "sourceToDestination", unique: true }

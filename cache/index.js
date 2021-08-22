@@ -4,7 +4,17 @@
  * dic hold the result object {source: String, destination: String, hits: int}
  */
 
-const schemas = require("../db/schema");
+/**
+ *  check in cashe if found increase local hit value
+ *  check DB if found insert to cache
+ * 	*	if insert add hit value
+ * 	*	if not update db hit value
+ * 	*	if removed need to update hit value of removed
+ * 	make api call to get distance
+ *  * 	add to DB insert to chache
+ */
+
+const querys = require("../db/querys");
 
 // will handle db req for data in not found and will update
 const maxLength = process.env.MAX_CACHE_LENGTH;
@@ -22,7 +32,8 @@ const cache = {};
  * @returns {number | null} return the distance if found else null
  */
 function checkCache(source, destination) {
-	if (source + destination in cache) return cache[source + destination];
+	key = `[${source},${destination}]`;
+	if (key in cache) return cache[key];
 	return null;
 }
 
@@ -36,6 +47,7 @@ function insert(result) {
 	if (max == maxLength) {
 		if (cache[sorted[max - 1]].hits < result.hits) {
 			//if reach max lenght and need to replace pop the smallest and remove from it cashe
+
 			delete cache[sorted[max - 1]];
 			sorted.pop();
 			max = max - 1;
