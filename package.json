@@ -4,7 +4,8 @@
   "description": "home assignment to build api server",
   "main": "index.js",
   "scripts": {
-    "test": "nodemon index.js"
+    "Express": "nodemon index.js",
+    "test-map" : "node map/index.js"
   },
   "repository": {
     "type": "git",
@@ -17,6 +18,7 @@
   },
   "homepage": "https://github.com/yakir2a/Geolocation-server---synamedia#readme",
   "dependencies": {
+    "@googlemaps/google-maps-services-js": "^3.1.16",
     "dotenv": "^10.0.0",
     "express": "^4.17.1",
     "mongoose": "^5.13.7"
