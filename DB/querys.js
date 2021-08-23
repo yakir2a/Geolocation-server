@@ -56,9 +56,14 @@ async function GetPopulerSearch() {
 }
 
 /**
+ * update existing doc or create new doc with user input source To Destination
+ * 						{ source, destination, distance }
  *
- * @param {{source:String, destination:String, distance:number}} param0
- * @returns
+ * @param {Object} sourceToDestination
+ * @param {String} sourceToDestination.source
+ * @param {String} sourceToDestination.destination
+ * @param {number} sourceToDestination.distance
+ * @returns {Object} or throw erroe if failed
  */
 async function setSourceToDestination({ source, destination, distance }) {
 	try {
